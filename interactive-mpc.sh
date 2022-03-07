@@ -2,18 +2,14 @@
 
 # "/tmp/hostname"が無い場合にホスト名を設定
 if ! cat /tmp/hostname 2> /dev/null ; then
-	echo "http://<<hostname>>.local" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname
+	echo "http://<<hostname>>.local" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo ""
+
 else
 	: # 何もしない
 fi
 
 # pingで疎通確認,成功時のみ入力を待つ
 if ping -c 2 $(cat /tmp/hostname).local | grep ttl > /dev/null ; then
-
-	# mpcコマンドをホスト名を指定して実行
-	mpc_host () {
-		mpc --host=$(cat /tmp/hostname).local
-	}
 
 # コマンド一覧を表示
 commands_list () {
@@ -44,52 +40,53 @@ do
 	echo 'command? > ' | tr "\n" " " && read command
 		case "$command" in
 
-			# プレイリスト一覧を表示
+			# プレイリスト一覧を環境変数で設定されたページャで表示,ない場合は標準出力に流す
 			[0])
-				mpc --host=$(cat /tmp/hostname).local playlist | $PAGER || 
-				mpc --host=$(cat /tmp/hostname).local playlist
+				mpc --host=$(cat /tmp/hostname).local playlist | less
+				# mpc --host=$(cat /tmp/hostname).local playlist
 			;;
 	
 			# 再生/一時停止
 			[1])
-				mpc --host=$(cat /tmp/hostname).local toggle
+				echo "" && mpc --host=$(cat /tmp/hostname).local toggle && echo ""
 			;;
 	
 			# 停止
 			[2])
-				mpc --host=$(cat /tmp/hostname).local stop
+			echo "" && 	mpc --host=$(cat /tmp/hostname).local stop && echo ""
 			;;
 	
 			# 前の曲
 			[3])
-				mpc --host=$(cat /tmp/hostname).local prev
+				echo "" && mpc --host=$(cat /tmp/hostname).local prev && echo "" 
 			;;
 	
 			# 次の曲
 			[4])
-				mpc --host=$(cat /tmp/hostname).local next
+				echo "" && mpc --host=$(cat /tmp/hostname).local next && echo ""
 			;;
 
 			# リピート 
 			[5])
-				mpc --host=$(cat /tmp/hostname).local repeat
+				echo "" && mpc --host=$(cat /tmp/hostname).local repeat && echo ""
 			;;
 
 			# ランダム
 			[6])
-				mpc --host=$(cat /tmp/hostname).local random
+				echo "" && mpc --host=$(cat /tmp/hostname).local random && echo ""
 			;;
 
 			# 音量の調整
 			[7])
-				echo "" && echo 'volume? > ' | tr "\n" " " && read sound_vol
+				echo "" && echo 'volume? > ' | tr "\n" " " && read sound_vol 
 
-				mpc --host=$(cat /tmp/hostname).local volume $sound_vol 
+				echo "" && pc --host=$(cat /tmp/hostname).local volume $sound_vol && echo ""
 			;;
 
 			[H])
-				echo "" && commands_list
+				echo "" && commands_list && echo ""
 			;;
+
 			# ホスト名の再設定
 			[C])
 				echo "http://<<hostname>>.local" && echo 'hostname? > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && exit 0
