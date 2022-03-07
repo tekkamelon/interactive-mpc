@@ -17,6 +17,7 @@ if ping -c 2 $(cat /tmp/hostname).local | grep ttl > /dev/null ; then
 
 # コマンド一覧を表示
 commands_list () {
+	echo ""
 	cat << EOS
 	command list
 	  playlist        -> [0]
@@ -45,7 +46,8 @@ do
 
 			# プレイリスト一覧を表示
 			[0])
-				mpc --host=$(cat /tmp/hostname).local playlist | $PAGER 
+				mpc --host=$(cat /tmp/hostname).local playlist | $PAGER || 
+				mpc --host=$(cat /tmp/hostname).local playlist
 			;;
 	
 			# 再生/一時停止
