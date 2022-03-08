@@ -13,7 +13,6 @@ if ping -c 2 $(cat /tmp/hostname).local | grep ttl > /dev/null ; then
 
 # コマンド一覧を表示
 commands_list () {
-	echo ""
 	cat << EOS
 	command list
 	  playlist        -> [0]
@@ -23,7 +22,8 @@ commands_list () {
 	  next            -> [4]
 	  repeat ON/OFF   -> [5]
 	  random ON/OFF   -> [6]
-	  volume          -> [7]
+	  searchplay      -> [7]
+	  volume          -> [8]
 	  help            -> [H]
 	  change host     -> [C]
 	  exit            -> [Q]
@@ -36,14 +36,12 @@ commands_list
 # "shift+q"キーを入力で終了,それ以外で一覧に表示されたコマンドを入力で実行
 while :
 do
-	# read -p "command? > " "command"
 	echo 'command? > ' | tr "\n" " " && read command
 		case "$command" in
 
 			# プレイリスト一覧を環境変数で設定されたページャで表示,ない場合は標準出力に流す
 			[0])
 				mpc --host=$(cat /tmp/hostname).local playlist | less
-				# mpc --host=$(cat /tmp/hostname).local playlist
 			;;
 	
 			# 再生/一時停止
@@ -76,8 +74,15 @@ do
 				echo "" && mpc --host=$(cat /tmp/hostname).local random && echo ""
 			;;
 
-			# 音量の調整
+			# 検索
 			[7])
+				echo "" && echo 'title? > ' | tr "\n" " " && read music_title
+
+				echo "" && echo \"$music_title\" | xargs -I{} mpc --host=$(cat /tmp/hostname).local searchplay {} && echo ""
+			;;
+
+			# 音量の調整
+			[8])
 				echo "" && echo 'volume? > ' | tr "\n" " " && read sound_vol 
 
 				echo "" && pc --host=$(cat /tmp/hostname).local volume $sound_vol && echo ""
