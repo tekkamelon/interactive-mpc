@@ -4,6 +4,10 @@ mpcを対話的に扱うシェルスクリプト
 ## install
 
 ```sh
+# mpcのインストール
+# debian系
+$ sudo apt install mpc
+
 # githubよりclone
 $ git clone https://github.com/tekkamelon/interactive-mpc
 
