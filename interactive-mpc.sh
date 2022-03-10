@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# "/tmp/hostname"が無い場合にホスト名を設定
-if ! cat /tmp/hostname 2> /dev/null ; then
+# 標準入力を読み取りホスト名を設定
+read_hostname (){
 	echo "http://<<hostname>>.local" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo ""
+}
 
-else
-	: # 何もしない
-fi
+# "/tmp/hostname"が無い場合にホスト名を設定
+test -e /tmp/hostname || read_hostname
 
 # pingで疎通確認,成功時のみ入力を待つ
 if ping -c 2 $(cat /tmp/hostname).local | grep ttl > /dev/null ; then
@@ -14,7 +14,7 @@ if ping -c 2 $(cat /tmp/hostname).local | grep ttl > /dev/null ; then
 # コマンド一覧を表示
 commands_list () {
 	cat << EOS
-	$(mpc version)
+	$(mpc --host=$(cat /tmp/hostname).local version)
 	command list
 	  playlist        -> [0]
 	  play/pause      -> [1]
