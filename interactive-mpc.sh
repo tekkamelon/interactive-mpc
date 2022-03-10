@@ -14,6 +14,7 @@ if ping -c 2 $(cat /tmp/hostname).local | grep ttl > /dev/null ; then
 # コマンド一覧を表示
 commands_list () {
 	cat << EOS
+	$(mpc version)
 	command list
 	  playlist        -> [0]
 	  play/pause      -> [1]
@@ -24,6 +25,7 @@ commands_list () {
 	  random ON/OFF   -> [6]
 	  searchplay      -> [7]
 	  volume          -> [8]
+	  update          -> [9]
 	  help            -> [H]
 	  change host     -> [C]
 	  exit            -> [Q]
@@ -39,7 +41,7 @@ do
 	echo 'command? > ' | tr "\n" " " && read command
 		case "$command" in
 
-			# プレイリスト一覧を環境変数で設定されたページャで表示,ない場合は標準出力に流す
+			# プレイリスト一覧を環境変数で設定されたページャで表示
 			[0])
 				mpc --host=$(cat /tmp/hostname).local playlist | less
 			;;
@@ -85,7 +87,12 @@ do
 			[8])
 				echo "" && echo 'volume? > ' | tr "\n" " " && read sound_vol 
 
-				echo "" && pc --host=$(cat /tmp/hostname).local volume $sound_vol && echo ""
+				echo "" && mpc --host=$(cat /tmp/hostname).local volume $sound_vol && echo ""
+			;;
+
+			# アップデート
+			[9])
+				echo "" && echo "now updating..." && mpc --host=$(cat /tmp/hostname).local update --wait && echo ""
 			;;
 
 			[H])
