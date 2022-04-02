@@ -14,9 +14,11 @@ if ping -c 2 $(cat /tmp/hostname) | grep ttl > /dev/null ; then
 # コマンド一覧を表示
 commands_list () {
 	cat << EOS
+
 	$(mpc --host=$(cat /tmp/hostname) version)
 	command list
 	  playlist        -> [0]
+	  status          -> [s]
 	  play/pause      -> [1]
 	  stop            -> [2]
 	  previous        -> [3]
@@ -29,12 +31,12 @@ commands_list () {
 	  help            -> [H]
 	  change host     -> [C]
 	  exit            -> [Q]
+
 EOS
-	echo ""
 }
 
-# コマンド一覧を表示
-commands_list
+# ステータス,コマンド一覧を表示
+echo "" && mpc --host=$(cat /tmp/hostname) status && commands_list
 
 # "shift+q"キーを入力で終了,それ以外で一覧に表示されたコマンドを入力で実行
 while :
@@ -47,6 +49,11 @@ do
 				mpc --host=$(cat /tmp/hostname) playlist | less
 			;;
 	
+			# プレイリスト一覧を環境変数で設定されたページャで表示
+			[s])
+				echo "" && mpc --host=$(cat /tmp/hostname) status && echo ""
+			;;
+
 			# 再生/一時停止
 			[1])
 				echo "" && mpc --host=$(cat /tmp/hostname) toggle && echo ""
@@ -115,3 +122,4 @@ else
 	# ホストが見つからない場合は"/tmp/hostname"を削除
 	rm /tmp/hostname
 fi
+
