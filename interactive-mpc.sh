@@ -5,17 +5,20 @@ read_hostname () {
 	echo "http://<<hostname or IP_adress>>" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo ""
 }
 
+# ホスト名を環境変数で設定
+export MPD_HOST=$(cat /tmp/hostname)
+
 # "/tmp/hostname"が無い場合にホスト名を設定
 test -e /tmp/hostname || read_hostname
 
 # pingで疎通確認,成功時のみ入力を待つ
-if ping -c 2 $(cat /tmp/hostname) | grep ttl > /dev/null ; then
+if ping -c 2 $MPD_HOST | grep ttl > /dev/null ; then
 
 # コマンド一覧を表示
 commands_list () {
 	cat << EOS
 
-	$(mpc --host=$(cat /tmp/hostname) version)
+	$(mpc version)
 	command list
 	  playlist        -> [0]
 	  status          -> [s]
@@ -36,7 +39,7 @@ EOS
 }
 
 # ステータス,コマンド一覧を表示
-echo "" && mpc --host=$(cat /tmp/hostname) status && commands_list
+echo "" && mpc status && commands_list
 
 # "shift+q"キーを入力で終了,それ以外で一覧に表示されたコマンドを入力で実行
 while :
@@ -46,61 +49,61 @@ do
 
 			# プレイリスト一覧を環境変数で設定されたページャで表示
 			[0])
-				mpc --host=$(cat /tmp/hostname) playlist | less
+				mpc playlist | less
 			;;
 	
 			# プレイリスト一覧を環境変数で設定されたページャで表示
 			[s])
-				echo "" && mpc --host=$(cat /tmp/hostname) status && echo ""
+				echo "" && mpc status && echo ""
 			;;
 
 			# 再生/一時停止
 			[1])
-				echo "" && mpc --host=$(cat /tmp/hostname) toggle && echo ""
+				echo "" && mpc toggle && echo ""
 			;;
 	
 			# 停止
 			[2])
-			echo "" && 	mpc --host=$(cat /tmp/hostname) stop && echo ""
+			echo "" && 	mpc stop && echo ""
 			;;
 	
 			# 前の曲
 			[3])
-				echo "" && mpc --host=$(cat /tmp/hostname) prev && echo "" 
+				echo "" && mpc prev && echo "" 
 			;;
 	
 			# 次の曲
 			[4])
-				echo "" && mpc --host=$(cat /tmp/hostname) next && echo ""
+				echo "" && mpc next && echo ""
 			;;
 
 			# リピート 
 			[5])
-				echo "" && mpc --host=$(cat /tmp/hostname) repeat && echo ""
+				echo "" && mpc repeat && echo ""
 			;;
 
 			# ランダム
 			[6])
-				echo "" && mpc --host=$(cat /tmp/hostname) random && echo ""
+				echo "" && mpc random && echo ""
 			;;
 
 			# 検索
 			[7])
 				echo "" && echo 'title? > ' | tr "\n" " " && read music_title
 
-				echo "" && echo \"$music_title\" | xargs -I{} mpc --host=$(cat /tmp/hostname) searchplay {} && echo ""
+				echo "" && echo \"$music_title\" | xargs -I{} mpc searchplay {} && echo ""
 			;;
 
 			# 音量の調整
 			[8])
 				echo "" && echo 'volume? > ' | tr "\n" " " && read sound_vol 
 
-				echo "" && mpc --host=$(cat /tmp/hostname) volume $sound_vol && echo ""
+				echo "" && mpc volume $sound_vol && echo ""
 			;;
 
 			# アップデート
 			[9])
-				echo "" && echo "now updating..." && mpc --host=$(cat /tmp/hostname) update --wait && echo ""
+				echo "" && echo "now updating..." && mpc update --wait && echo ""
 			;;
 
 			[H])
