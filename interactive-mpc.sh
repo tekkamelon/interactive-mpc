@@ -2,7 +2,7 @@
 
 # キーボードの入力を読み取りホスト名またはIPアドレスを設定
 read_hostname () {
-	echo "http://<<hostname or IP_adress>>" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" && export MPD_HOST=$(cat /tmp/hostname)
+	echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" && export MPD_HOST=$(cat /tmp/hostname)
 }
 
 # "/tmp/hostname"が無い場合にホスト名を設定
@@ -14,8 +14,7 @@ if export MPD_HOST=$(cat /tmp/hostname) && mpc status ; then
 # コマンド一覧を表示
 commands_list () {
 	cat << EOS
-
-	$(mpc version)
+	$(echo "HOST:$MPD_HOST")
 	command list
 	  playlist        -> [0]
 	  status          -> [s]
@@ -109,7 +108,7 @@ do
 
 			# ホスト名の再設定
 			[C])
-				echo "http://<<hostname>>" && echo 'hostname? > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && exit 0
+				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && exit 0
 			;;
 
 			# 終了
