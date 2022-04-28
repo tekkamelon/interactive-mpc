@@ -1,18 +1,15 @@
-#!/bin/sh
+#!/bin/sh 
 
 # キーボードの入力を読み取りホスト名またはIPアドレスを設定
 read_hostname () {
-	echo "http://<<hostname or IP_adress>>" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo ""
+	echo "http://<<hostname or IP_adress>>" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" && export MPD_HOST=$(cat /tmp/hostname)
 }
 
-# ホスト名を環境変数で設定
-export MPD_HOST=$(cat /tmp/hostname)
-
 # "/tmp/hostname"が無い場合にホスト名を設定
-test -e /tmp/hostname || read_hostname
+test -e /tmp/hostname || read_hostname 
 
-# pingで疎通確認,成功時のみ入力を待つ
-if ping -c 2 $MPD_HOST | grep ttl > /dev/null ; then
+# 一時ファイルを環境変数に代入,mpcで疎通確認,成功時のみ入力を待つ
+if export MPD_HOST=$(cat /tmp/hostname) && mpc status ; then
 
 # コマンド一覧を表示
 commands_list () {
@@ -39,7 +36,7 @@ EOS
 }
 
 # ステータス,コマンド一覧を表示
-echo "" && mpc status && commands_list
+echo "" && commands_list
 
 # "shift+q"キーを入力で終了,それ以外で一覧に表示されたコマンドを入力で実行
 while :
