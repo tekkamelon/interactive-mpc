@@ -87,7 +87,8 @@ do
 			[7])
 				echo "" && echo 'title? > ' | tr "\n" " " && read music_title
 
-				echo "" && echo \"$music_title\" | xargs -I{} mpc searchplay {} && echo ""
+				# echo "" && echo \"$music_title\" | xargs -I{} mpc searchplay {} && echo ""
+				mpc searchplay filename "$(mpc search title '$music_title' | sed -n '1p')"
 			;;
 
 			# 音量の調整
