@@ -87,8 +87,7 @@ do
 			[7])
 				echo "" && echo 'title? > ' | tr "\n" " " && read music_title
 
-				# echo "" && echo \"$music_title\" | xargs -I{} mpc searchplay {} && echo ""
-				mpc searchplay filename "$(mpc search title '$music_title' | sed -n '1p')"
+				echo "" && mpc searchplay filename "$(mpc search title '$music_title' | sed -n '1p')" && echo ""
 			;;
 
 			# 音量の調整
@@ -109,7 +108,7 @@ do
 
 			# ホスト名の再設定
 			[C])
-				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && exit 0
+				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; export MPD_HOST=$hostname && echo ""
 			;;
 
 			# 終了
