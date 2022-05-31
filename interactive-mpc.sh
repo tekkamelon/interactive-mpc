@@ -43,7 +43,7 @@ do
 	echo 'command? > ' | tr "\n" " " && read command
 		case "$command" in
 
-			# プレイリスト一覧を環境変数で設定されたページャで表示
+			# プレイリスト一覧をページャで表示
 			[0])
 				mpc playlist | less
 			;;
@@ -60,7 +60,7 @@ do
 	
 			# 停止
 			[2])
-			echo "" && 	mpc stop && echo ""
+				echo "" && 	mpc stop && echo ""
 			;;
 	
 			# 前の曲
@@ -102,13 +102,14 @@ do
 				echo "" && echo "now updating..." && mpc update --wait && echo ""
 			;;
 
+			# コマンド一覧の表示
 			[H])
 				echo "" && commands_list && echo ""
 			;;
 
 			# ホスト名の再設定
 			[C])
-				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; export MPD_HOST=$hostname && echo ""
+				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; export MPD_HOST=$hostname && echo "$MPD_HOST" | tee /tmp/hostname && echo ""
 			;;
 
 			# 終了
