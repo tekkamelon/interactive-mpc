@@ -29,6 +29,7 @@ commands_list () {
 	  update          -> [9]
 	  help            -> [H]
 	  change host     -> [C]
+	  clear           -> [c]
 	  exit            -> [Q]
 
 EOS
@@ -111,6 +112,11 @@ do
 			# ホスト名の再設定
 			[C])
 				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; export MPD_HOST=$hostname && echo "$MPD_HOST" | tee /tmp/hostname && echo ""
+				mpc && echo ""
+			;;
+
+			[c])
+				clear && commands_list	
 			;;
 
 			# 終了
