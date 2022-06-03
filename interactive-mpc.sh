@@ -45,7 +45,7 @@ do
 
 			# プレイリスト一覧をページャで表示
 			[0])
-				mpc playlist | less
+				mpc playlist | less && echo ""
 			;;
 	
 			# プレイリスト一覧を環境変数で設定されたページャで表示
@@ -85,16 +85,17 @@ do
 
 			# 検索
 			[7])
-				echo "" && echo 'title? > ' | tr "\n" " " && read music_title
+				echo "" && echo '"format" "keywords" > ' | tr "\n" " " && read format search_keywords
 
-				echo "" && mpc searchplay filename "$(mpc search title '$music_title' | sed -n '1p')" && echo ""
+					echo "" && mpc search $format $search_keywords | mpc add && mpc searchplay $search_keywords && echo ""
+
 			;;
 
 			# 音量の調整
 			[8])
 				echo "" && echo 'volume? > ' | tr "\n" " " && read sound_vol 
 
-				echo "" && mpc volume $sound_vol && echo ""
+					echo "" && mpc volume $sound_vol && echo ""
 			;;
 
 			# アップデート
