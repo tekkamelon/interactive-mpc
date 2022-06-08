@@ -1,8 +1,16 @@
-#!/bin/sh 
+#!/bin/sh
 
 # キーボードの入力を読み取りホスト名またはIPアドレスを設定
 read_hostname () {
-	echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" && export MPD_HOST=$(cat /tmp/hostname)
+	if echo $MPD_HOST | grep . ; then
+
+		echo $MPD_HOST > /tmp/hostname
+
+	else
+
+		echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" && export MPD_HOST=$(cat /tmp/hostname)
+
+	fi
 }
 
 # "/tmp/hostname"が無い場合にホスト名を設定
@@ -89,7 +97,6 @@ do
 				echo "" && echo '"format" "keywords" > ' | tr "\n" " " && read format search_keywords
 
 					echo "" && mpc search $format $search_keywords | mpc add && mpc searchplay $search_keywords && echo ""
-
 			;;
 
 			# 音量の調整
