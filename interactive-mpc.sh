@@ -8,7 +8,11 @@ read_hostname () {
 
 	else
 
-		echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname > ' | tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" && export MPD_HOST=$(cat /tmp/hostname)
+		# プロンプトの表示
+		echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname > ' |
+		# 入力を読み取り一時ファイルに保存,環境変数に代入
+		tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" \
+		&& export MPD_HOST=$(cat /tmp/hostname)
 
 	fi
 }
@@ -24,21 +28,21 @@ commands_list () {
 	cat << EOS
 	$(echo "HOST:$MPD_HOST")
 	command list
-	  playlist        -> [0]
-	  status          -> [s]
-	  play/pause      -> [1]
-	  stop            -> [2]
-	  previous        -> [3]
-	  next            -> [4]
-	  repeat ON/OFF   -> [5]
-	  random ON/OFF   -> [6]
-	  searchplay      -> [7]
-	  volume          -> [8]
-	  update          -> [9]
-	  help            -> [H]
-	  change host     -> [C]
-	  clear           -> [c]
-	  exit            -> [Q]
+	  playlist      -> [0]
+	  status        -> [s]
+	  play/pause    -> [1]
+	  stop          -> [2]
+	  previous      -> [3]
+	  next          -> [4]
+	  repeat ON/OFF -> [5]
+	  random ON/OFF -> [6]
+	  searchplay    -> [7]
+	  volume        -> [8]
+	  update        -> [9]
+	  help          -> [H]
+	  change host   -> [C]
+	  clear         -> [c]
+	  exit          -> [Q]
 
 EOS
 }
@@ -49,7 +53,7 @@ echo "" && commands_list
 # "shift+q"キーを入力で終了,それ以外で一覧に表示されたコマンドを入力で実行
 while :
 do
-	echo 'command? > ' | tr "\n" " " && read command
+	echo "$MPD_HOST > " | tr "\n" " " && read command
 		case "$command" in
 
 			# プレイリスト一覧をページャで表示
