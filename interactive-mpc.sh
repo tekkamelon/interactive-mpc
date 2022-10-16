@@ -10,25 +10,47 @@ read_hostname () {
 
 		# プロンプトの表示
 		echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname > ' |
+
 		# 入力を読み取り一時ファイルに保存,環境変数に代入
-		tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" \
-		&& export MPD_HOST=$(cat /tmp/hostname)
+		tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" &&
+		export MPD_HOST=$(cat /tmp/hostname)
+
+	fi
+}
+
+read_port () {
+	if echo $MPD_PORT | grep . ; then
+
+		echo $MPD_PORT > /tmp/port
+
+	else
+
+		# プロンプトの表示
+		echo "port number(default: 6600)" && echo 'port > ' |
+
+		# 入力を読み取り一時ファイルに保存,環境変数に代入
+		tr "\n" " " && read port ; echo "$port" > /tmp/port && echo "" &&
+		export MPD_PORT=$(cat /tmp/port)
 
 	fi
 }
 
 # "/tmp/hostname"が無い場合にホスト名を設定
-test -e /tmp/hostname || read_hostname 
+test -e /tmp/hostname || read_hostname && 
+
+# "/tmp/port"が無い場合にポート番号を設定
+test -e /tmp/port || read_port 
 
 # 一時ファイルを環境変数に代入,mpcで疎通確認,成功時のみ入力を待つ
-if export MPD_HOST=$(cat /tmp/hostname) && mpc status ; then
+if export MPD_HOST=$(cat /tmp/hostname) && export MPD_PORT=$(cat /tmp/port) && mpc status ; then
 
 # コマンド一覧を表示
 commands_list () {
 	cat << EOS
-	$(echo "HOST:$MPD_HOST")
+	$(echo "MPD_HOST:$MPD_HOST")
+	$(echo "MPD_PORT:$MPD_PORT")
 	command list
-	  playlist      -> [0]
+	  queued        -> [0]
 	  status        -> [s]
 	  play/pause    -> [1]
 	  stop          -> [2]
@@ -41,6 +63,7 @@ commands_list () {
 	  update        -> [9]
 	  help          -> [H]
 	  change host   -> [C]
+	  change port   -> [P]
 	  clear         -> [c]
 	  exit          -> [Q]
 
@@ -53,10 +76,10 @@ echo "" && commands_list
 # "shift+q"キーを入力で終了,それ以外で一覧に表示されたコマンドを入力で実行
 while :
 do
-	echo "$MPD_HOST > " | tr "\n" " " && read command
+	echo "$MPD_HOST:$MPD_PORT > " | tr "\n" " " && read command
 		case "$command" in
 
-			# プレイリスト一覧をページャで表示
+			# キュー内の曲をページャで表示
 			[0])
 				mpc playlist | less && echo ""
 			;;
@@ -126,6 +149,13 @@ do
 				mpc && echo ""
 			;;
 
+			# ポート番号の再設定
+			[P])
+				echo "http://<<port or IP_adress>> or localhost" && echo 'port? > ' | tr "\n" " " && read port ; export MPD_PORT=$port && echo "$MPD_PORT" | tee /tmp/port && echo ""
+				mpc && echo ""
+			;;
+
+			# 端末をクリアしコマンドリストを表示
 			[c])
 				clear && commands_list	
 			;;
