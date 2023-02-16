@@ -3,17 +3,20 @@
 ##### 関数の設定 ##### 
 # キーボードの入力を読み取りホスト名またはIPアドレスを設定
 read_hostname () {
-	if echo ${MPD_HOST} | grep . ; then
 
-		echo ${MPD_HOST} > /tmp/hostname
+	if [ -n "${MPD_HOST}" ] ; then
+
+		echo "${MPD_HOST}" >| /tmp/hostname
 
 	else
 
 		# プロンプトの表示
-		echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname > ' |
+		printf "http://<<hostname or IP_adress>> or localhost\nhostname > " &&
 
-		# 入力を読み取り一時ファイルに保存,環境変数に代入
-		tr "\n" " " && read hostname ; echo "$hostname" > /tmp/hostname && echo "" &&
+		# 入力を読み取り一時ファイルに保存
+		read hostname ; echo "${hostname}" >| /tmp/hostname && echo ""
+
+		# 環境変数に代入
 		export MPD_HOST=$(cat /tmp/hostname)
 
 	fi
@@ -21,17 +24,18 @@ read_hostname () {
 
 # キーボードの入力を読み取りポート番号を設定
 read_port () {
-	if echo ${MPD_PORT} | grep . ; then
 
-		echo ${MPD_PORT} > /tmp/port
+	if [ -n "${MPD_PORT}" ] ; then
+
+		echo "${MPD_PORT}" >| /tmp/port
 
 	else
 
 		# プロンプトの表示
-		echo "port number(default: 6600)" && echo 'port > ' |
+		printf "port number(default: 6600)\nnumber of port > " &&
 
 		# 入力を読み取り一時ファイルに保存
-		tr "\n" " " && read port ; echo "$port" > /tmp/port && echo "" &&
+		read port ; echo "$port" >| /tmp/port && echo ""
 
 		# 環境変数に代入
 		export MPD_PORT=$(cat /tmp/port)
@@ -175,6 +179,7 @@ do
 					echo "connection refused!"
 					echo ""
 					
+					# 元の環境変数を代入
 					export MPD_PORT=$(cat /tmp/port)
 				
 				fi
