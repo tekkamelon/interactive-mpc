@@ -1,10 +1,11 @@
 #!/bin/sh
 
+##### 関数の設定 ##### 
 # キーボードの入力を読み取りホスト名またはIPアドレスを設定
 read_hostname () {
-	if echo $MPD_HOST | grep . ; then
+	if echo ${MPD_HOST} | grep . ; then
 
-		echo $MPD_HOST > /tmp/hostname
+		echo ${MPD_HOST} > /tmp/hostname
 
 	else
 
@@ -18,22 +19,26 @@ read_hostname () {
 	fi
 }
 
+# キーボードの入力を読み取りポート番号を設定
 read_port () {
-	if echo $MPD_PORT | grep . ; then
+	if echo ${MPD_PORT} | grep . ; then
 
-		echo $MPD_PORT > /tmp/port
+		echo ${MPD_PORT} > /tmp/port
 
 	else
 
 		# プロンプトの表示
 		echo "port number(default: 6600)" && echo 'port > ' |
 
-		# 入力を読み取り一時ファイルに保存,環境変数に代入
+		# 入力を読み取り一時ファイルに保存
 		tr "\n" " " && read port ; echo "$port" > /tmp/port && echo "" &&
+
+		# 環境変数に代入
 		export MPD_PORT=$(cat /tmp/port)
 
 	fi
 }
+######
 
 # "/tmp/hostname"が無い場合にホスト名を設定
 test -e /tmp/hostname || read_hostname && 
@@ -47,8 +52,8 @@ if export MPD_HOST=$(cat /tmp/hostname) && export MPD_PORT=$(cat /tmp/port) && m
 # コマンド一覧を表示
 commands_list () {
 	cat << EOS
-	$(echo "MPD_HOST:$MPD_HOST")
-	$(echo "MPD_PORT:$MPD_PORT")
+	$(echo "MPD_HOST:${MPD_HOST}")
+	$(echo "MPD_PORT:${MPD_PORT}")
 	command list
 	  queued        -> [0]
 	  status        -> [s]
@@ -76,7 +81,7 @@ echo "" && commands_list
 # "shift+q"キーを入力で終了,それ以外で一覧に表示されたコマンドを入力で実行
 while :
 do
-	echo "$MPD_HOST:$MPD_PORT > " | tr "\n" " " && read command
+	echo "${MPD_HOST}:${MPD_PORT} > " | tr "\n" " " && read command
 		case "$command" in
 
 			# キュー内の曲をページャで表示
@@ -145,14 +150,36 @@ do
 
 			# ホスト名の再設定
 			[C])
-				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; export MPD_HOST=$hostname && echo "$MPD_HOST" | tee /tmp/hostname && echo ""
+				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; export MPD_HOST="${hostname}" && echo "${MPD_HOST}" | tee /tmp/hostname && echo ""
 				mpc && echo ""
 			;;
 
 			# ポート番号の再設定
 			[P])
-				echo "http://<<port or IP_adress>> or localhost" && echo 'port? > ' | tr "\n" " " && read port ; export MPD_PORT=$port && echo "$MPD_PORT" | tee /tmp/port && echo ""
-				mpc && echo ""
+				
+				# メッセージを出力
+				printf "number of port? > " &&
+
+				# キーボードからの入力を読み取り,"port"に代入,"MPD_PORT"に"port"を代入
+				read port ; export MPD_PORT=${port} && 
+
+				# ポート番号が有効であれば真,無効であれば偽
+				if mpc status -q "${MPD_HOST}" "${MPD_PORT}" ; then
+
+					# 真の場合は入力を一時ファイルに書き込み
+					echo "${MPD_PORT}" | tee /tmp/port && echo ""
+
+				else
+
+					# 偽であればメッセージを表示
+					echo "connection refused!"
+					echo ""
+					
+					export MPD_PORT=$(cat /tmp/port)
+				
+				fi
+
+				mpc status && echo ""
 			;;
 
 			# 端末をクリアしコマンドリストを表示
