@@ -11,7 +11,7 @@ read_hostname () {
 	else
 
 		# プロンプトの表示
-		printf "http://<<hostname or IP_adress>> or localhost\nhostname > " &&
+		printf "http://<<hostname or IP_adress>> or localhost\nhostname > "
 
 		# 入力を読み取り一時ファイルに保存
 		read hostname ; echo "${hostname}" >| /tmp/hostname && echo ""
@@ -20,6 +20,7 @@ read_hostname () {
 		export MPD_HOST=$(cat /tmp/hostname)
 
 	fi
+
 }
 
 # キーボードの入力を読み取りポート番号を設定
@@ -32,7 +33,7 @@ read_port () {
 	else
 
 		# プロンプトの表示
-		printf "port number(default: 6600)\nnumber of port > " &&
+		printf "port number(default: 6600)\nnumber of port > "
 
 		# 入力を読み取り一時ファイルに保存
 		read port ; echo "$port" >| /tmp/port && echo ""
@@ -41,6 +42,7 @@ read_port () {
 		export MPD_PORT=$(cat /tmp/port)
 
 	fi
+
 }
 ######
 
@@ -154,8 +156,34 @@ do
 
 			# ホスト名の再設定
 			[C])
-				echo "http://<<hostname or IP_adress>> or localhost" && echo 'hostname? > ' | tr "\n" " " && read hostname ; export MPD_HOST="${hostname}" && echo "${MPD_HOST}" | tee /tmp/hostname && echo ""
-				mpc && echo ""
+
+				# メッセージを出力
+				printf "http://<<hostname or IP_adress>> or localhost > " &&
+
+				# キーボードからの入力を読み取り,"host"に代入,"MPD_HOST"に"port"を代入
+				read host ; export MPD_HOST=${host} && 
+
+				# ホスト名が有効であれば真,無効であれば偽
+				if mpc status -q "${MPD_HOST}" "${MPD_PORT}" ; then
+
+					# 真の場合は入力を一時ファイルに書き込み
+					echo "${MPD_HOST}" | tee /tmp/host && echo "" &
+
+					# メッセージを表示
+					echo "connection success!"
+
+				else
+
+					# 偽であればメッセージを表示
+					echo "connection refused!"
+					echo "" &
+					
+					# 元の環境変数を代入
+					export MPD_HOST=$(cat /tmp/hostname)
+				
+				fi
+
+				mpc status && echo ""
 			;;
 
 			# ポート番号の再設定
@@ -171,13 +199,16 @@ do
 				if mpc status -q "${MPD_HOST}" "${MPD_PORT}" ; then
 
 					# 真の場合は入力を一時ファイルに書き込み
-					echo "${MPD_PORT}" | tee /tmp/port && echo ""
+					echo "${MPD_PORT}" | tee /tmp/port && echo "" &&
+
+					# メッセージを表示
+					echo "connection success!"
 
 				else
 
 					# 偽であればメッセージを表示
 					echo "connection refused!"
-					echo ""
+					echo "" &
 					
 					# 元の環境変数を代入
 					export MPD_PORT=$(cat /tmp/port)
