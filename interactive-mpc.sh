@@ -88,7 +88,7 @@ echo "" && commands_list
 while :
 do
 	echo "${MPD_HOST}:${MPD_PORT} > " | tr "\n" " " && read command
-		case "$command" in
+		case "${command}" in
 
 			# キュー内の曲をページャで表示
 			[0])
@@ -132,25 +132,48 @@ do
 
 			# 検索
 			[7])
-				echo "" && echo '"format" "keywords" > ' | tr "\n" " " && read format search_keywords
+				
+				# プロンプトの表示
+				printf "\nformat keywords > " && 
 
-					echo "" && mpc search $format $search_keywords | mpc add && mpc searchplay $search_keywords && echo ""
+				# 入力を読み取り,"format","search_keywords"に代入
+				read format search_keywords
+
+				# 読み取った入力をmpcに渡し検索
+				echo "" && mpc search "${format}" "${search_keywords}" |
+
+				# 検索結果をキューに追加して再生
+				mpc add && mpc searchplay "${search_keywords}" && echo ""
+
 			;;
 
 			# 音量の調整
 			[8])
-				echo "" && echo 'volume? > ' | tr "\n" " " && read sound_vol 
 
-					echo "" && mpc volume $sound_vol && echo ""
+				# プロンプトの表示
+				printf "\nvolume? > " &&
+
+				# 入力を読み取り,"sound_vol"に代入
+				read sound_vol 
+
+				# 入力をmpcに渡す
+				echo "" && mpc volume "${sound_vol}" && echo ""
+
 			;;
 
 			# アップデート
 			[9])
-				echo "" && echo "now updating..." && mpc update --wait && echo ""
+
+				# メッセージを表示
+				printf "\nnow updating..." && 
+
+				mpc update --wait && echo ""
+
 			;;
 
 			# コマンド一覧の表示
 			[H])
+
 				echo "" && commands_list && echo ""
 			;;
 
