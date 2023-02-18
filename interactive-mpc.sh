@@ -1,6 +1,6 @@
 #!/bin/sh
 
-##### 関数の設定 ##### 
+# ====== 関数の定義 ======
 # キーボードの入力を読み取りホスト名またはIPアドレスを設定
 read_hostname () {
 
@@ -44,7 +44,7 @@ read_port () {
 	fi
 
 }
-######
+# ====== 関数の定義の終了 ======
 
 # "/tmp/hostname"が無い場合にホスト名を設定
 test -e /tmp/hostname || read_hostname && 
@@ -88,6 +88,8 @@ echo "" && commands_list
 while :
 do
 	echo "${MPD_HOST}:${MPD_PORT} > " | tr "\n" " " && read command
+
+		# コマンドの処理
 		case "${command}" in
 
 			# キュー内の曲をページャで表示
@@ -206,6 +208,7 @@ do
 				
 				fi
 
+				# ステータスを表示
 				mpc status && echo ""
 			;;
 
@@ -238,6 +241,7 @@ do
 				
 				fi
 
+				# ステータスを表示
 				mpc status && echo ""
 			;;
 
