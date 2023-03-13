@@ -40,7 +40,7 @@ read_port () {
 		printf "port number(default: 6600)\nnumber of port > "
 
 		# 入力を読み取り一時ファイルに保存
-		read port ; echo "$port" >| /tmp/port && echo ""
+		read port ; echo "${port}" >| /tmp/port && echo ""
 
 		# 環境変数に代入
 		export MPD_PORT=$(cat /tmp/port)
@@ -57,7 +57,7 @@ test -e /tmp/hostname || read_hostname &&
 test -e /tmp/port || read_port 
 
 # 一時ファイルを環境変数に代入,mpcで疎通確認,成功した場合は真,失敗した場合は偽
-if export MPD_HOST=$(cat /tmp/hostname) && export MPD_PORT=$(cat /tmp/port) && mpc status ; then
+if { export MPD_HOST=$(cat /tmp/hostname) ; export MPD_PORT=$(cat /tmp/port) ; } && mpc status ; then
 
 # ====== ヒアドキュメントでコマンド一覧を表示 ======
 commands_list () {
@@ -93,50 +93,69 @@ EOS
 
 	do
 
+		# 空白行を出力
 		echo ""
-		echo "${MPD_HOST}:${MPD_PORT} > " | tr "\n" " " && read command
+
+		# プロンプトの表示
+		printf "${MPD_HOST}:${MPD_PORT} > " && read command
 	
 			# コマンドの処理
 			case "${command}" in
 	
 				# キュー内の曲をページャで表示
 				[0])
+				
 					mpc playlist | less
+					
 				;;
 		
 				# ステータスを表示
 				[s])
+				
 					echo "" && mpc status
+					
 				;;
 	
 				# 再生/一時停止
 				[1])
+				
 					echo "" && mpc toggle
+					
 				;;
 		
 				# 停止
 				[2])
+				
 					echo "" && 	mpc stop
+					
 				;;
 		
 				# 前の曲
 				[3])
+				
 					echo "" && mpc prev 
+					
 				;;
 		
 				# 次の曲
 				[4])
+				
 					echo "" && mpc next
+					
 				;;
 	
 				# リピート 
 				[5])
+				
 					echo "" && mpc repeat
+					
 				;;
 	
 				# ランダム
 				[6])
+
 					echo "" && mpc random
+
 				;;
 	
 				# 検索
@@ -184,6 +203,7 @@ EOS
 				[H])
 	
 					echo "" && commands_list
+
 				;;
 	
 				# ホスト名の再設定
@@ -219,6 +239,7 @@ EOS
 	
 					# ステータスを表示
 					mpc status && echo ""
+
 				;;
 	
 				# ポート番号の再設定
@@ -251,16 +272,21 @@ EOS
 	
 					# ステータスを表示
 					mpc status
+
 				;;
 	
 				# 端末をクリアしコマンドリストを表示
 				[c])
+
 					clear && commands_list	
+
 				;;
 	
 				# 終了
 				[Q])
+
 					exit 0
+
 				;;
 
 			esac
