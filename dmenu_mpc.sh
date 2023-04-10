@@ -1,7 +1,8 @@
 #!/bin/sh -eu
 
-# コマンドの一覧
+# コマンド一覧
 command=$(cat << EOS
+status
 toggle
 next
 prev
@@ -9,30 +10,35 @@ random
 repeat
 stop
 clear
-lsplaylist 
+listplaylist
 playlist
 listall
 EOS
 )
 
-# change_HOST
-# change_PORT
+# dmenuの設定
+dmenu_custom="dmenu $@"
 
-# コマンド一覧をdmenuで表示,選択されたコマンドを代入
-selected_command=$(echo "${command}" | dmenu)
+# コマンド一覧を${dmenu_custom}で表示,選択されたコマンドを代入
+selected_command=$(echo "${command}" | ${dmenu_custom})
 
 # 選択されたコマンドに応じて処理を分岐
 case "${selected_command}" in
 
+	# ステータスの表示
+	"status" ) mpc status | ${dmenu_custom} ;;
+
+	# toggle,next,prev,random,repeat,stop,clearの処理
 	"toggle" | "next" | "prev" | "random" | "repeat" | "stop" | "clear" ) echo "${selected_command}" | xargs mpc ;;
 
-	"lsplaylist" ) echo "${selected_command}" | xargs mpc | dmenu | xargs mpc load ;;
+	# playlistの処理
+	"playlist" ) mpc playlist | nl -s":" | ${dmenu_custom} | cut -d":" -f1 | xargs mpc play ;;
 
-	"playlist" ) echo "${selected_command}" | xargs mpc | nl -s":" | dmenu | cut -d":" -f1 | xargs mpc play ;;
+	# listallの処理
+	"listall" ) mpc listall | ${dmenu_custom} | mpc insert && mpc next ;;
 
-	"listall" ) echo "${selected_command}" | xargs mpc | dmenu | mpc insert && mpc next ;;
-
-	# "change_HOST" ) echo "please Enter hostname or IP adress" | dmenu | xargs -I{} mpc -q --host={} || echo "error!" | dmenu
+	# lsplaylistの処理
+	"listplaylist" ) mpc lsplaylist | ${dmenu_custom} | xargs mpc load ;;
 
 esac
 
