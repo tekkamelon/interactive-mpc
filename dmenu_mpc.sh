@@ -49,8 +49,8 @@ EOS
 
 # スクリプト本体の起動時の引数をdmenuに渡す
 # デフォルトはフォントを"monospace"プロンプトに"dmenu_mpc",13行で表示
-# dmenu_custom="dmenu -fn "monospace" -p "dmenu_mpc" -l 13 ${@}"
-dmenu_custom="rofi -dmenu"
+dmenu_custom="dmenu -fn "monospace" -p "dmenu_mpc" -l 13 ${@}"
+# dmenu_custom="rofi -dmenu"
 
 # コマンド一覧を${dmenu_custom}で表示,選択されたコマンドを代入
 selected_command=$(echo "${command}" | ${dmenu_custom})
@@ -87,7 +87,7 @@ case "${selected_command}" in
 
 		else
 
-			# 偽の場合はメッセージを表示,dmenuに渡す
+			# 偽の場合はメッセージを表示,dmenuに渡し,選択結果を捨てる
 			echo "failed to resolve hostname!" | ${dmenu_custom} > /dev/null
 
 		fi ;;
@@ -106,7 +106,7 @@ case "${selected_command}" in
 
 		else
 
-			# 偽の場合はメッセージを表示,dmenuに渡す
+			# 偽の場合はメッセージを表示,dmenuに渡し,選択結果を捨てる
 			echo "failed to resolve number of port!" | ${dmenu_custom} > /dev/null
 
 		fi ;;
