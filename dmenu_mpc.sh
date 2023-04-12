@@ -42,6 +42,7 @@ clear
 listplaylist
 playlist
 listall
+searchplay
 change_HOST
 change_PORT
 EOS
@@ -72,6 +73,9 @@ case "${selected_command}" in
 
 	# lsplaylistの場合,プレイリスト一覧をdmenuに渡し,選択結果をmpcに渡す
 	"listplaylist" ) mpc lsplaylist | ${dmenu_custom} | xargs mpc load ;;
+
+	# searchplayの場合,入力をmpcに渡す
+	"searchplay" ) ${dmenu_custom} -p "please enter words" | xargs mpc searchplay ;;
 
 	# change_HOSTの場合,dmneuから受け取った入力を変数に代入
 	"change_HOST" ) input_host=$(cat /tmp/hostname | ${dmenu_custom} -p "please Enter hostname or IP adress")
@@ -119,3 +123,4 @@ esac |
 # 各コマンドの結果をdmenuに渡し,選択結果を捨てる
 ${dmenu_custom} > /dev/null
 
+exit 0
