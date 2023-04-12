@@ -39,7 +39,7 @@ random
 repeat
 stop
 clear
-listplaylist
+lsplaylist
 playlist
 listall
 searchplay
@@ -49,8 +49,8 @@ EOS
 )
 
 # スクリプト本体の起動時の引数をdmenuに渡す
-# デフォルトはフォントを"monospace"プロンプトに"dmenu_mpc",13行で表示
-dmenu_custom="dmenu -fn "monospace" -p "dmenu_mpc" -l 13 ${@}"
+# デフォルトはフォントを"monospace",プロンプトに"dmenu_mpc",14行で表示
+dmenu_custom="dmenu -i -fn "monospace" -p "$(echo "${MPD_HOST}")" -l 14 ${@}"
 # dmenu_custom="rofi -dmenu"
 
 # コマンド一覧を${dmenu_custom}で表示,選択されたコマンドを代入
@@ -72,7 +72,7 @@ case "${selected_command}" in
 	"listall" ) mpc listall | ${dmenu_custom} | mpc insert && mpc next ;;
 
 	# lsplaylistの場合,プレイリスト一覧をdmenuに渡し,選択結果をmpcに渡す
-	"listplaylist" ) mpc lsplaylist | ${dmenu_custom} | xargs mpc load ;;
+	"lsplaylist" ) mpc lsplaylist | ${dmenu_custom} | xargs mpc load ;;
 
 	# searchplayの場合,入力をmpcに渡す
 	"searchplay" ) ${dmenu_custom} -p "please enter words" | xargs mpc searchplay ;;
