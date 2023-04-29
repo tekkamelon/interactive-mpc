@@ -5,7 +5,8 @@
 if [ -e /tmp/hostname ] ; then
 
 	# 真の場合はファイル内を環境変数に代入
-	export MPD_HOST=$(cat /tmp/hostname)
+	host="$(cat /tmp/hostname)"
+	export MPD_HOST="${host}"
 
 else
 
@@ -14,12 +15,13 @@ else
 
 fi
 
+# "/tmp/port"の有無を確認,あれば真,なければ偽
 if [ -e /tmp/port ] ; then
 
 	# 真の場合はファイル内を環境変数に代入
-	export MPD_PORT=$(cat /tmp/port)
+	port="$(cat /tmp/port)"
+	export MPD_PORT="${port}"
 
-# "/tmp/port"の有無を確認,あれば真,なければ偽
 else
 
 	# 偽の場合は環境変数に6600を代入
@@ -50,7 +52,8 @@ EOS
 
 # スクリプト本体の起動時の引数をdmenuに渡す
 # デフォルトはフォントを"monospace",プロンプトに"dmenu_mpc",14行で表示
-dmenu_custom="dmenu -i -fn "monospace" -p "$(echo "${MPD_HOST}")" -l 14 ${@}"
+# dmenu_custom="dmenu -i -fn "monospace" -p "$(echo "${MPD_HOST}")" -l 14 ${*}"
+dmenu_custom="dmenu -i -fn monospace -p ${MPD_HOST} -l 14 ${*}"
 # dmenu_custom="rofi -dmenu"
 
 # コマンド一覧を${dmenu_custom}で表示,選択されたコマンドを代入
@@ -124,3 +127,4 @@ esac |
 ${dmenu_custom} > /dev/null
 
 exit 0
+

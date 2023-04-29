@@ -16,10 +16,11 @@ read_hostname () {
 		printf "http://<<hostname or IP_adress>> or localhost\nhostname > "
 
 		# 入力を読み取り一時ファイルに保存
-		read hostname ; echo "${hostname}" >| /tmp/hostname && echo ""
+		read -r hostname ; echo "${hostname}" >| /tmp/hostname && echo ""
 
 		# 環境変数に代入
-		export MPD_HOST=$(cat /tmp/hostname)
+		host="$(cat /tmp/hostname)"
+		export MPD_HOST="${host}"
 
 	fi
 
@@ -40,30 +41,32 @@ read_port () {
 		printf "port number(default: 6600)\nnumber of port > "
 
 		# 入力を読み取り一時ファイルに保存
-		read port ; echo "${port}" >| /tmp/port && echo ""
+		read -r port ; echo "${port}" >| /tmp/port && echo ""
 
 		# 環境変数に代入
-		export MPD_PORT=$(cat /tmp/port)
+		port="$(cat /tmp/port)"
+		export MPD_PORT="${port}"
 
 	fi
 
 }
 # ====== 関数の定義の終了 ======
 
-# "/tmp/hostname"が無い場合にホスト名を設定
-test -e /tmp/hostname || read_hostname && 
-
-# "/tmp/port"が無い場合にポート番号を設定
+# "/tmp/hostname","/tmp/port"が無い場合にホスト名及びポート番号を設定
+test -e /tmp/hostname || read_hostname
 test -e /tmp/port || read_port 
 
 # 一時ファイルを環境変数に代入,mpcで疎通確認,成功した場合は真,失敗した場合は偽
-if { export MPD_HOST=$(cat /tmp/hostname) ; export MPD_PORT=$(cat /tmp/port) ; } && mpc status ; then
+host="$(cat /tmp/hostname)"
+port="$(cat /tmp/port)"
+
+if { export MPD_HOST="${host}" ; export MPD_PORT="${port}" ; } && mpc status ; then
 
 # ====== ヒアドキュメントでコマンド一覧を表示 ======
 commands_list () {
 	cat << EOS
-	$(echo "MPD_HOST:${MPD_HOST}")
-	$(echo "MPD_PORT:${MPD_PORT}")
+	"MPD_HOST:${MPD_HOST}"
+	"MPD_PORT:${MPD_PORT}"
 	command list
 	  queued        -> [0]
 	  status        -> [s]
@@ -97,7 +100,7 @@ EOS
 		echo ""
 
 		# プロンプトの表示
-		printf "${MPD_HOST}:${MPD_PORT} > " && read command
+		printf "${MPD_HOST}"":""${MPD_PORT} %s>%s " && read -r command
 	
 			# コマンドの処理
 			case "${command}" in
@@ -165,7 +168,7 @@ EOS
 					printf "format keywords > "
 	
 					# 入力を読み取り,"format","search_keywords"に代入
-					read format search_keywords
+					read -r format search_keywords
 	
 					# 読み取った入力をmpcに渡し検索
 					echo "" && mpc search "${format}" "${search_keywords}" |
@@ -182,7 +185,7 @@ EOS
 					printf "volume? > "
 
 					# 入力を読み取り,"sound_vol"に代入
-					read sound_vol 
+					read -r sound_vol 
 	
 					# 入力をmpcに渡す
 					echo "" && mpc volume "${sound_vol}"
@@ -213,7 +216,7 @@ EOS
 					printf "http://<<hostname or IP_adress>> or localhost > "
 	
 					# キーボードからの入力を読み取り,"host"に代入,"MPD_HOST"に"port"を代入
-					read host ; export MPD_HOST=${host} && 
+					read -r host ; export MPD_HOST="${host}" && 
 	
 					# ホスト名が有効であれば真,無効であれば偽
 					if mpc status -q "${MPD_HOST}" "${MPD_PORT}" ; then
@@ -233,7 +236,8 @@ EOS
 						echo "" &
 						
 						# 元の環境変数を代入
-						export MPD_HOST=$(cat /tmp/hostname)
+						host="$(cat /tmp/hostname)"
+						export MPD_HOST="${host}"
 					
 					fi
 	
@@ -249,7 +253,7 @@ EOS
 					printf "number of port? > " &&
 	
 					# キーボードからの入力を読み取り,"port"に代入,"MPD_PORT"に"port"を代入
-					read port ; export MPD_PORT=${port} && 
+					read -r port ; export MPD_PORT="${port}" && 
 	
 					# ポート番号が有効であれば真,無効であれば偽
 					if mpc status -q "${MPD_HOST}" "${MPD_PORT}" ; then
@@ -266,7 +270,8 @@ EOS
 						echo "connection refused!" &
 						
 						# 元の環境変数を代入
-						export MPD_PORT=$(cat /tmp/port)
+						port="$(cat /tmp/port)"
+						export MPD_PORT="${port}"
 					
 					fi
 	
