@@ -52,12 +52,16 @@ EOS
 
 # スクリプト本体の起動時の引数をdmenuに渡す
 # デフォルトはフォントを"monospace",プロンプトに"dmenu_mpc",14行で表示
-# dmenu_custom="dmenu -i -fn "monospace" -p "$(echo "${MPD_HOST}")" -l 14 ${*}"
 dmenu_custom="dmenu -i -fn monospace -p ${MPD_HOST} -l 14 ${*}"
-# dmenu_custom="rofi -dmenu"
 
 # コマンド一覧を${dmenu_custom}で表示,選択されたコマンドを代入
 selected_command=$(echo "${command}" | ${dmenu_custom})
+
+# 一時ファイルに保存されたホスト名,無ければ"localhost"
+host=$(cat /tmp/hostname || echo "localhost")
+
+# 一時ファイルに保存されたポート番号,無ければ"6600"
+port=$(cat /tmp/port || echo "6600")
 
 # 選択されたコマンドに応じて処理を分岐
 case "${selected_command}" in
@@ -81,7 +85,7 @@ case "${selected_command}" in
 	"searchplay" ) ${dmenu_custom} -p "please enter words" | xargs mpc searchplay ;;
 
 	# change_HOSTの場合,dmneuから受け取った入力を変数に代入
-	"change_HOST" ) input_host=$(cat /tmp/hostname | ${dmenu_custom} -p "please Enter hostname or IP adress")
+	"change_HOST" ) input_host=$(echo "${host}" | ${dmenu_custom} -p "please Enter hostname or IP adress")
 		
 		# "input_host"で疎通確認,成功で真,失敗で偽
 		if mpc --host="${input_host}" ; then 
@@ -100,7 +104,7 @@ case "${selected_command}" in
 		fi ;;
 
 	# change_PORTの場合,dmneuから受け取った入力を変数に代入
-	"change_PORT" ) input_port=$(cat /tmp/port  | ${dmenu_custom} -p "please Enter number of port")
+	"change_PORT" ) input_port=$(echo "${port}" | ${dmenu_custom} -p "please Enter number of port")
 		
 		# "input_host"で疎通確認,成功で真,失敗で偽
 		if mpc --port="${input_port}" ; then 
@@ -127,4 +131,3 @@ esac |
 ${dmenu_custom} > /dev/null
 
 exit 0
-
