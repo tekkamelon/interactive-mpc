@@ -16,7 +16,7 @@ read_hostname () {
 		# 偽の場合はプロンプトの表示
 		printf "http://<<hostname or IP_adress>> or localhost(default: localhost)\nhostname > "
 
-		# 入力を読み取り一時ファイルに保存
+		# キーボードからの入力を読み取り,"hostname"に代入
 		read -r hostname ;
 
 			# "hostname"の有無を確認,あれば真,無ければ偽
@@ -55,8 +55,22 @@ read_port () {
 		# 偽の場合はプロンプトの表示
 		printf "port number(default: 6600)\nnumber of port > "
 
-		# 入力を読み取り一時ファイルに保存
-		read -r port ; echo "${port}" >| /tmp/port && echo ""
+		# キーボードからの入力を読み取り,"port"に代入
+		read -r port ;
+
+		# "port"濃霧を確認.あれば真.無ければ偽
+		if [ -n "${port}" ] ; then
+
+			# 真の場合は"port"を出力
+			echo "${port}"
+
+		else
+
+			# 偽の場合は"6600"を出力
+			echo "6600"
+
+		# 出力を一時ファイルに書き込み
+		fi >| /tmp/port && echo ""
 
 		# 環境変数に代入
 		port="$(cat /tmp/port)"
@@ -237,20 +251,18 @@ EOS
 					if [ -z "${host}" ] ; then
 	
 						# 真の場合は"localhost"を一時ファイルに書き込み
-						echo "localhost" | tee /tmp/hostneme & echo ""
-
-						echo "connection success!"
+						echo "localhost" | tee /tmp/hostnaeme & echo ""
 
 					# 偽の場合は"host"で疎通確認できれば真,できなければ偽
 					elif mpc status -q "${host}" "${MPD_PORT}" ; then
 	
-						# 真の場合は環境変数に"host"を代入
+						# 真の場合は"host"を環境変数に代入
 						export MPD_HOST="${host}"
 
-						# 環境変数一時ファイルに書き込み
-						echo "${MPD_HOST}" | tee /tmp/hostname & echo ""
+						# 環境変数を一時ファイルに書き込み
+						echo "${MPD_HOST}" | tee /tmp/hostname & 
 
-						echo "connection success!"
+						printf "connection success\n\n"
 
 					else 
 	
@@ -272,24 +284,32 @@ EOS
 				[P])
 					
 					# メッセージを出力
-					printf "number of port? > " &&
+					printf "number of port > "
 	
-					# キーボードからの入力を読み取り,"port"に代入,"MPD_PORT"に"port"を代入
-					read -r port ; export MPD_PORT="${port}" && 
+					# キーボードからの入力を読み取り,"port"に代入
+					read -r port ;
 	
-					# ポート番号が有効であれば真,無効であれば偽
-					if mpc status -q "${MPD_HOST}" "${MPD_PORT}" ; then
+					# "port"があれば真,無ければ偽
+					if [ -z "${port}" ] ; then
+						
+						# 真の場合は"6600"を一時ファイルに書き込み
+						echo "6600" | tee /tmp/port & echo ""
+						
+					# 偽の場合は"port"で疎通確認できれば真,できなければ偽
+					elif mpc status -q "${MPD_HOST}" "${port}" ; then
 	
-						# 真の場合は入力を一時ファイルに書き込み
-						echo "${MPD_PORT}" | tee /tmp/port &&
-	
-						# メッセージを表示
-						echo "connection success!"
+						# 真の場合は"port"を環境変数に代入
+						export MPD_PORT="${port}"
+
+						# 環境変数を一時ファイルに書き込み
+						echo "${MPD_PORT}" | tee /tmp/port & 
+
+						printf "connection success!\n\n"
 	
 					else
 	
 						# 偽であればメッセージを表示
-						echo "connection refused!" &
+						printf "connection refused!\n\n" &
 						
 						# 元の環境変数を代入
 						port="$(cat /tmp/port)"
