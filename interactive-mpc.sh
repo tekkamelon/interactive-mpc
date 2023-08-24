@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # ====== 関数の定義 ======
 # キーボードの入力を読み取りホスト名またはIPアドレスを設定
 read_hostname () {
@@ -13,10 +14,24 @@ read_hostname () {
 	else
 
 		# 偽の場合はプロンプトの表示
-		printf "http://<<hostname or IP_adress>> or localhost\nhostname > "
+		printf "http://<<hostname or IP_adress>> or localhost(default: localhost)\nhostname > "
 
 		# 入力を読み取り一時ファイルに保存
-		read -r hostname ; echo "${hostname}" >| /tmp/hostname && echo ""
+		read -r hostname ;
+
+			# "hostname"の有無を確認,あれば真,無ければ偽
+			if [ -n "${hostname}" ] ; then
+
+				# 真の場合は"hostname"を出力
+				echo "${hostname}"
+
+			else
+
+				# 偽の場合は"localhost"を出力
+				echo "localhost"
+
+			# 出力を一時ファイルに書き込み
+			fi >| /tmp/hostname && echo ""
 
 		# 環境変数に代入
 		host="$(cat /tmp/hostname)"
@@ -50,7 +65,8 @@ read_port () {
 	fi
 
 }
-# ====== 関数の定義の終了 ======
+# ====== 関数の定義ここまで ======
+
 
 # "/tmp/hostname","/tmp/port"が無い場合にホスト名及びポート番号を設定
 test -e /tmp/hostname || read_hostname
@@ -61,6 +77,7 @@ host="$(cat /tmp/hostname)"
 port="$(cat /tmp/port)"
 
 if { export MPD_HOST="${host}" ; export MPD_PORT="${port}" ; } && mpc status ; then
+
 
 # ====== ヒアドキュメントでコマンド一覧を表示 ======
 commands_list () {
@@ -87,6 +104,7 @@ commands_list () {
 EOS
 }
 # ====== ヒアドキュメントここまで ======
+
 	
 	# 真の場合はステータス,コマンド一覧を表示
 	echo "" && commands_list
@@ -165,16 +183,13 @@ EOS
 				[7])
 					
 					# プロンプトの表示
-					printf "format keywords > "
+					printf "keywords > "
 	
 					# 入力を読み取り,"format","search_keywords"に代入
-					read -r format search_keywords
+					read -r search_keywords
 	
 					# 読み取った入力をmpcに渡し検索
-					echo "" && mpc search "${format}" "${search_keywords}" |
-	
-					# 検索結果をキューに追加して再生
-					mpc insert && mpc next
+					echo "" && mpc searchplay "${search_keywords}"
 	
 				;;
 	
@@ -212,37 +227,44 @@ EOS
 				# ホスト名の再設定
 				[C])
 	
-					# メッセージを出力
-					printf "http://<<hostname or IP_adress>> or localhost > "
+					# プロンプトを表示
+					printf "http://<<hostname or IP_adress>> or localhost\nhostname > "
 	
-					# キーボードからの入力を読み取り,"host"に代入,"MPD_HOST"に"port"を代入
-					read -r host ; export MPD_HOST="${host}" && 
+					# キーボードからの入力を読み取り,"host"に代入
+					read -r host ;
 	
-					# ホスト名が有効であれば真,無効であれば偽
-					if mpc status -q "${MPD_HOST}" "${MPD_PORT}" ; then
+					# "host"が無ければ真,あれば偽
+					if [ -z "${host}" ] ; then
 	
-						# 真の場合は入力を一時ファイルに書き込み
-						echo "${MPD_HOST}" | tee /tmp/host && echo "" &
-	
-						# メッセージを表示
+						# 真の場合は"localhost"を一時ファイルに書き込み
+						echo "localhost" | tee /tmp/hostneme & echo ""
+
 						echo "connection success!"
+
+					# 偽の場合は"host"で疎通確認できれば真,できなければ偽
+					elif mpc status -q "${host}" "${MPD_PORT}" ; then
 	
-					else
+						# 真の場合は環境変数に"host"を代入
+						export MPD_HOST="${host}"
+
+						# 環境変数一時ファイルに書き込み
+						echo "${MPD_HOST}" | tee /tmp/hostname & echo ""
+
+						echo "connection success!"
+
+					else 
 	
 						# 偽であればメッセージを表示
-						echo "connection refused!"
-	
-						# 改行を出力
-						echo "" &
+						printf "connection refused!\n\n" &
 						
 						# 元の環境変数を代入
 						host="$(cat /tmp/hostname)"
 						export MPD_HOST="${host}"
-					
+
 					fi
 	
 					# ステータスを表示
-					mpc status && echo ""
+					mpc status
 
 				;;
 	
