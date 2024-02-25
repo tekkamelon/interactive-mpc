@@ -1,101 +1,32 @@
 #!/bin/sh
 
 
+# ====== 変数の設定 ======
+# ロケールの設定
+export LC_ALL=C
+export LANG=C
+
+# GNU coreutilsの挙動をPOSIXに準拠
+export POSIXLY_CORRECT=1
+
+. "${HOME}"/.interactive_mpc.conf
+# ====== 変数の設定ここまで ======
+
+
 # ====== 関数の定義 ======
-# キーボードの入力を読み取りホスト名またはIPアドレスを設定
-read_hostname () {
+# ヒアドキュメントで設定ファイルの変数を出力
+heredocs () {
 
-	# 環境変数の有無を確認,あれば真,無ければ偽
-	if [ -n "${MPD_HOST}" ] ; then
-
-		# 真の場合は環境変数を一時ファイルに書き込み
-		echo "${MPD_HOST}" >| /tmp/hostname
-
-	else
-
-		# 偽の場合はプロンプトの表示
-		printf "http://<<hostname or IP_adress>> or localhost(default: localhost)\nhostname > "
-
-		# キーボードからの入力を読み取り,"hostname"に代入
-		read -r hostname ;
-
-			# "hostname"の有無を確認,あれば真,無ければ偽
-			if [ -n "${hostname}" ] ; then
-
-				# 真の場合は"hostname"を出力
-				echo "${hostname}"
-
-			else
-
-				# 偽の場合は"localhost"を出力
-				echo "localhost"
-
-			# 出力を一時ファイルに書き込み
-			fi >| /tmp/hostname && echo ""
-
-		# 環境変数に代入
-		host="$(cat /tmp/hostname)"
-		export MPD_HOST="${host}"
-
-	fi
+	cat <<- EOF
+	export MPD_HOST="${MPD_HOST}"
+	export MPD_PORT="${MPD_PORT}"
+	EOF
 
 }
 
-# キーボードの入力を読み取りポート番号を設定
-read_port () {
-
-	# 環境変数の有無を確認,あれば真,無ければ偽
-	if [ -n "${MPD_PORT}" ] ; then
-
-		# 真の場合は環境変数を一時ファイルに書き込み
-		echo "${MPD_PORT}" >| /tmp/port
-
-	else
-
-		# 偽の場合はプロンプトの表示
-		printf "port number(default: 6600)\nnumber of port > "
-
-		# キーボードからの入力を読み取り,"port"に代入
-		read -r port ;
-
-		# "port"濃霧を確認.あれば真.無ければ偽
-		if [ -n "${port}" ] ; then
-
-			# 真の場合は"port"を出力
-			echo "${port}"
-
-		else
-
-			# 偽の場合は"6600"を出力
-			echo "6600"
-
-		# 出力を一時ファイルに書き込み
-		fi >| /tmp/port && echo ""
-
-		# 環境変数に代入
-		port="$(cat /tmp/port)"
-		export MPD_PORT="${port}"
-
-	fi
-
-}
-# ====== 関数の定義ここまで ======
-
-
-# "/tmp/hostname","/tmp/port"が無い場合にホスト名及びポート番号を設定
-test -e /tmp/hostname || read_hostname
-test -e /tmp/port || read_port 
-
-# 一時ファイルを環境変数に代入,mpcで疎通確認,成功した場合は真,失敗した場合は偽
-host="$(cat /tmp/hostname)"
-port="$(cat /tmp/port)"
-
-if { export MPD_HOST="${host}" ; export MPD_PORT="${port}" ; } && mpc status ; then
-
-
-# ====== ヒアドキュメントでコマンド一覧を表示 ======
 commands_list () {
-	cat << EOS
+
+	cat <<- EOS
 	"MPD_HOST:${MPD_HOST}"
 	"MPD_PORT:${MPD_PORT}"
 	command list
@@ -115,10 +46,92 @@ commands_list () {
 	  change port   -> [P]
 	  clear         -> [c]
 	  exit          -> [Q]
-EOS
+	EOS
+	
 }
-# ====== ヒアドキュメントここまで ======
 
+# キーボードの入力を読み取りホスト名またはIPアドレスを設定
+read_hostname () {
+
+	# 環境変数の有無を確認,あれば真,無ければ偽
+	if [ -n "${MPD_HOST}" ] ; then
+
+		# 真の場合は環境変数を一時ファイルに書き込み
+		# echo "${MPD_HOST}" >| /tmp/hostname
+		heredocs >| "${HOME}"/.interactive_mpc.conf
+
+	else
+
+		# 偽の場合はプロンプトの表示
+		printf "http://<<hostname or IP_adress>> or localhost(default: localhost)\nhostname > "
+
+		# キーボードからの入力を読み取り,"hostname"に代入
+		read -r hostname ;
+
+			# "hostname"の有無を確認,あれば真,無ければ偽
+			if [ -n "${hostname}" ] ; then
+
+				# 真の場合は"hostname"を出力
+				export MPD_HOST="${hostname}"
+
+			else
+
+				# 偽の場合は"localhost"を出力
+				export MPD_HOST="localhost"
+
+			# 出力を一時ファイルに書き込み
+			fi 
+
+			heredocs >| "${HOME}"/.interactive_mpc.conf && echo ""
+
+		# 環境変数に代入
+		. "${HOME}"/.interactive_mpc.conf
+
+	fi
+
+}
+
+# キーボードの入力を読み取りポート番号を設定
+read_port () {
+
+	# 環境変数の有無を確認,あれば真,無ければ偽
+	if [ -n "${MPD_PORT}" ] ; then
+
+		heredocs >| "${HOME}"/.interactive_mpc.conf
+
+	else
+
+		# 偽の場合はプロンプトの表示
+		printf "port number(default: 6600)\nnumber of port > "
+
+		# キーボードからの入力を読み取り,"port"に代入
+		read -r port ;
+
+		# "port"の有無を確認.あれば真.無ければ偽
+		if [ -n "${port}" ] ; then
+
+			# 真の場合は"port"を出力
+			export MPD_PORT="${port}"
+
+		else
+
+			# 偽の場合は"6600"を出力
+			export MPD_PORT="6600"
+
+		fi
+			
+		heredocs >| "${HOME}"/.interactive_mpc.conf && echo ""
+
+		# 環境変数に代入
+		. "${HOME}"/.interactive_mpc.conf
+
+	fi
+
+}
+# ====== 関数の定義ここまで ======
+
+
+if mpc status ; then
 	
 	# 真の場合はステータス,コマンド一覧を表示
 	echo "" && commands_list
@@ -250,17 +263,15 @@ EOS
 					# "host"が無ければ真,あれば偽
 					if [ -z "${host}" ] ; then
 	
-						# 真の場合は"localhost"を一時ファイルに書き込み
-						echo "localhost" | tee /tmp/hostnaeme & echo ""
+						heredocs >| "${HOME}"/.interactive_mpc.conf
 
 					# 偽の場合は"host"で疎通確認できれば真,できなければ偽
-					elif mpc status -q "${host}" "${MPD_PORT}" ; then
+					elif mpc status -q --host="${host}" ; then
 	
 						# 真の場合は"host"を環境変数に代入
 						export MPD_HOST="${host}"
 
-						# 環境変数を一時ファイルに書き込み
-						echo "${MPD_HOST}" | tee /tmp/hostname & 
+						heredocs >| "${HOME}"/.interactive_mpc.conf &
 
 						printf "connection success\n\n"
 
@@ -268,10 +279,6 @@ EOS
 	
 						# 偽であればメッセージを表示
 						printf "connection refused!\n\n" &
-						
-						# 元の環境変数を代入
-						host="$(cat /tmp/hostname)"
-						export MPD_HOST="${host}"
 
 					fi
 	
@@ -292,28 +299,26 @@ EOS
 					# "port"があれば真,無ければ偽
 					if [ -z "${port}" ] ; then
 						
-						# 真の場合は"6600"を一時ファイルに書き込み
-						echo "6600" | tee /tmp/port & echo ""
+						export MPD_PORT=6600
+
+						heredocs >| "${HOME}"/.interactive_mpc.conf
 						
 					# 偽の場合は"port"で疎通確認できれば真,できなければ偽
-					elif mpc status -q "${MPD_HOST}" "${port}" ; then
+					elif mpc status -q --port="${port}" ; then
 	
 						# 真の場合は"port"を環境変数に代入
 						export MPD_PORT="${port}"
 
 						# 環境変数を一時ファイルに書き込み
-						echo "${MPD_PORT}" | tee /tmp/port & 
+						# echo "${MPD_PORT}" | tee /tmp/port & 
+						heredocs >| "${HOME}"/.interactive_mpc.conf &
 
 						printf "connection success!\n\n"
 	
 					else
 	
 						# 偽であればメッセージを表示
-						printf "connection refused!\n\n" &
-						
-						# 元の環境変数を代入
-						port="$(cat /tmp/port)"
-						export MPD_PORT="${port}"
+						printf "connection refused!\n\n"
 					
 					fi
 	
@@ -339,11 +344,6 @@ EOS
 			esac
 
 	done
-
-else
-
-	# 偽の場合は一時ファイルを削除
-	rm /tmp/hostname /tmp/port
 
 fi
 
