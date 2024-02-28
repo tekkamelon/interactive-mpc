@@ -9,6 +9,7 @@ export LANG=C
 # GNU coreutilsの挙動をPOSIXに準拠
 export POSIXLY_CORRECT=1
 
+# 設定ファイルの読み込み
 . "${HOME}"/.interactive_mpc.conf
 # ====== 変数の設定ここまで ======
 
@@ -24,6 +25,7 @@ heredocs () {
 
 }
 
+# コマンドのリスト
 commands_list () {
 
 	cat <<- EOS
@@ -57,7 +59,6 @@ read_hostname () {
 	if [ -n "${MPD_HOST}" ] ; then
 
 		# 真の場合は環境変数を一時ファイルに書き込み
-		# echo "${MPD_HOST}" >| /tmp/hostname
 		heredocs >| "${HOME}"/.interactive_mpc.conf
 
 	else
@@ -79,9 +80,9 @@ read_hostname () {
 				# 偽の場合は"localhost"を出力
 				export MPD_HOST="localhost"
 
-			# 出力を一時ファイルに書き込み
 			fi 
 
+			# 変数の一覧を出力,設定ファイルへリダイレクト
 			heredocs >| "${HOME}"/.interactive_mpc.conf && echo ""
 
 		# 環境変数に代入
@@ -97,6 +98,7 @@ read_port () {
 	# 環境変数の有無を確認,あれば真,無ければ偽
 	if [ -n "${MPD_PORT}" ] ; then
 
+		# 変数の一覧を出力,設定ファイルへリダイレクト
 		heredocs >| "${HOME}"/.interactive_mpc.conf
 
 	else
@@ -120,6 +122,7 @@ read_port () {
 
 		fi
 			
+		# 変数の一覧を出力,設定ファイルへリダイレクト
 		heredocs >| "${HOME}"/.interactive_mpc.conf && echo ""
 
 		# 環境変数に代入
@@ -131,6 +134,7 @@ read_port () {
 # ====== 関数の定義ここまで ======
 
 
+# ====== スクリプトによる処理 ======
 if mpc status ; then
 	
 	# 真の場合はステータス,コマンド一覧を表示
@@ -263,6 +267,7 @@ if mpc status ; then
 					# "host"が無ければ真,あれば偽
 					if [ -z "${host}" ] ; then
 	
+						# 真の場合は変数の一覧を出力,設定ファイルへリダイレクト
 						heredocs >| "${HOME}"/.interactive_mpc.conf
 
 					# 偽の場合は"host"で疎通確認できれば真,できなければ偽
@@ -271,6 +276,7 @@ if mpc status ; then
 						# 真の場合は"host"を環境変数に代入
 						export MPD_HOST="${host}"
 
+						# 変数の一覧を出力,設定ファイルへリダイレクト
 						heredocs >| "${HOME}"/.interactive_mpc.conf &
 
 						printf "connection success\n\n"
@@ -301,6 +307,7 @@ if mpc status ; then
 						
 						export MPD_PORT=6600
 
+						# 変数の一覧を出力,設定ファイルへリダイレクト
 						heredocs >| "${HOME}"/.interactive_mpc.conf
 						
 					# 偽の場合は"port"で疎通確認できれば真,できなければ偽
@@ -309,8 +316,7 @@ if mpc status ; then
 						# 真の場合は"port"を環境変数に代入
 						export MPD_PORT="${port}"
 
-						# 環境変数を一時ファイルに書き込み
-						# echo "${MPD_PORT}" | tee /tmp/port & 
+						# 変数の一覧を出力,設定ファイルへリダイレクト
 						heredocs >| "${HOME}"/.interactive_mpc.conf &
 
 						printf "connection success!\n\n"
@@ -346,4 +352,5 @@ if mpc status ; then
 	done
 
 fi
+# ====== スクリプトによる処理ここまで ======
 
