@@ -14,36 +14,6 @@ export POSIXLY_CORRECT=1
 # ====== 変数の設定ここまで ======
 
 
-# ====== ホスト名およびポート番号の設定 ======
-# "/tmp/hostname"の有無を確認,あれば真,なければ偽
-# if [ -e /tmp/hostname ] ; then
-
-# 	# 真の場合はファイル内を環境変数に代入
-# 	host="$(cat /tmp/hostname)"
-# 	export MPD_HOST="${host}"
-
-# else
-
-# 	# 偽の場合は環境変数にlocalhostを代入
-# 	export MPD_HOST=localhost
-
-# fi
-
-# # "/tmp/port"の有無を確認,あれば真,なければ偽
-# if [ -e /tmp/port ] ; then
-
-# 	# 真の場合はファイル内を環境変数に代入
-# 	port="$(cat /tmp/port)"
-# 	export MPD_PORT="${port}"
-
-# else
-
-# 	# 偽の場合は環境変数に6600を代入
-# 	export MPD_PORT=6600
-
-# fi
-# ====== ホスト名およびポート番号の設定を終了 ======
-
 # ====== 関数の定義 ======
 # ヒアドキュメントで設定ファイルの変数を出力
 heredocs () {
@@ -85,10 +55,8 @@ dmenu_custom="dmenu -i -fn monospace -p ${MPD_HOST} -l 14 ${*}"
 # コマンド一覧を${dmenu_custom}で表示,選択されたコマンドを代入
 selected_command=$(commands_list | ${dmenu_custom})
 
-# 一時ファイルに保存されたホスト名,無ければ"localhost"
+# 環境変数を代入
 host="${MPD_HOST}"
-
-# 一時ファイルに保存されたポート番号,無ければ"6600"
 port="${MPD_PORT}"
 
 # 選択されたコマンドに応じて処理を分岐
@@ -121,8 +89,6 @@ case "${selected_command}" in
 			# 真の場合はメッセージを表示
 			echo "chagned host:${input_host}"
 
-			# 一時ファイルに書き込み
-			# echo "${input_host}" >| /tmp/hostname
 			export MPD_HOST="${input_host}"
 
 			# 真の場合は変数の一覧を出力,設定ファイルへリダイレクト
@@ -143,9 +109,6 @@ case "${selected_command}" in
 
 			# 真の場合はメッセージを表示
 			echo "chagned port:${input_port}"
-
-			# 一時ファイルに書き込み
-			# echo "${input_port}" >| /tmp/port
 
 			export MPD_PORT="${input_port}"
 
