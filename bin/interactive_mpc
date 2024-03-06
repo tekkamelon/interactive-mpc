@@ -1,17 +1,7 @@
 #!/bin/sh
 
-
-# ====== 変数の設定 ======
-# ロケールの設定
-export LC_ALL=C
-export LANG=C
-
 # GNU coreutilsの挙動をPOSIXに準拠
 export POSIXLY_CORRECT=1
-
-# 設定ファイルの読み込み
-. "${HOME}"/.interactive_mpc.conf
-# ====== 変数の設定ここまで ======
 
 
 # ====== 関数の定義 ======
@@ -135,6 +125,38 @@ read_port () {
 
 
 # ====== スクリプトによる処理 ======
+# MPD_HOSTがありかつMPD_PORTがない場合に真
+if [ -n "${MPD_HOST}" ] && [ -z "${MPD_PORT}" ] ; then
+
+	export MPD_PORT=6600
+
+# MPD_PORTがありかつMPD_HOSTがない場合に真
+elif [ -z "${MPD_HOST}" ] && [ -n "${MPD_PORT}" ] ; then
+
+	export MPD_HOST=localhost
+
+# どちらもない場合に真
+elif [ -z "${MPD_HOST}" ] && [ -z "${MPD_PORT}" ] ; then
+
+	# 設定ファイルのがあれば真,なければ偽
+	if [ -e "${HOME}"/.interactive_mpc.conf ] ; then
+
+		# 設定ファイルの読み込み
+		. "${HOME}"/.interactive_mpc.conf
+
+	else
+
+		export MPD_HOST=localhost
+		export MPD_PORT=6600
+		
+		# 変数の一覧を出力,設定ファイルへリダイレクト
+		heredocs >| "${HOME}"/.interactive_mpc.conf
+
+	fi
+
+fi
+
+# mpcで疎通確認できれば真
 if mpc status ; then
 	
 	# 真の場合はステータス,コマンド一覧を表示
