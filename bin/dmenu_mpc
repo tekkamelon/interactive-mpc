@@ -1,4 +1,4 @@
-#!/bin/sh -eu
+#!/bin/sh
 
 # shellcheck disable=SC1091
 
@@ -9,11 +9,6 @@ export LANG=C
 
 # GNU coreutilsの挙動をPOSIXに準拠
 export POSIXLY_CORRECT=1
-
-# 設定ファイルの読み込み
-. "${HOME}"/.interactive_mpc.conf
-# ====== 変数の設定ここまで ======
-
 
 # ====== 関数の定義 ======
 # ヒアドキュメントで設定ファイルの変数を出力
@@ -49,6 +44,39 @@ commands_list () {
 }
 # ====== 関数の定義ここまで ======
 
+
+# ====== スクリプトによる処理 ======
+# MPD_HOSTがありかつMPD_PORTがない場合に真
+if [ -n "${MPD_HOST}" ] && [ -z "${MPD_PORT}" ] ; then
+
+	export MPD_PORT="6600"
+
+# MPD_PORTがありかつMPD_HOSTがない場合に真
+elif [ -z "${MPD_HOST}" ] && [ -n "${MPD_PORT}" ] ; then
+
+	export MPD_HOST="localhost"
+
+# どちらもない場合に真
+elif [ -z "${MPD_HOST}" ] && [ -z "${MPD_PORT}" ] ; then
+
+	# 設定ファイルのがあれば真,なければ偽
+	if [ -e "${HOME}"/.interactive_mpc.conf ] ; then
+
+		# 設定ファイルの読み込み
+		. "${HOME}"/.interactive_mpc.conf
+
+	else
+
+		export MPD_HOST="localhost"
+		export MPD_PORT="6600"
+		
+		# 変数の一覧を出力,設定ファイルへリダイレクト
+		heredocs >| "${HOME}"/.interactive_mpc.conf
+
+	fi
+
+fi
+
 # スクリプト本体の起動時の引数をdmenuに渡す
 # デフォルトはフォントを"monospace",プロンプトに"dmenu_mpc",14行で表示
 dmenu_custom="dmenu -i -fn monospace -p ${MPD_HOST} -l 14 ${*}"
@@ -70,7 +98,7 @@ case "${selected_command}" in
 	"toggle" | "next" | "prev" | "random" | "repeat" | "stop" | "clear" ) mpc "${selected_command}" ;;
 
 	# playlistの場合,キュー内の曲に行番号を付与して出力,dmenuへ渡し,選択結果の行番号のみmpcに渡す
-	"playlist" ) mpc playlist | grep -n . | ${dmenu_custom} | cut -d":" -f1 | xargs mpc play ;;
+	"playlist" ) mpc playlist | nl -s":" | ${dmenu_custom} | cut -d":" -f1 | xargs mpc play ;;
 
 	# listallの場合,曲一覧をdmenuに渡し,選択結果をmpcに渡す
 	"listall" ) mpc listall | ${dmenu_custom} | mpc insert && mpc next ;;
