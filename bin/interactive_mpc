@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# shellcheck disable=SC1091
+
 # GNU coreutilsの挙動をPOSIXに準拠
 export POSIXLY_CORRECT=1
 

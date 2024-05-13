@@ -1,5 +1,6 @@
 #!/bin/sh -eu
 
+# shellcheck disable=SC1091
 
 # ====== 変数の設定 ======
 # ロケールの設定
