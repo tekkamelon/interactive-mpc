@@ -1,13 +1,36 @@
 #!/bin/sh
 
-set -eu
+set -e
 # ====== 変数の設定 ======
 
 export LC_ALL=C
 export LANG=C
 
 export POSIXLY_CORRECT=1
+
+host="$(hostname)"
+
+# MPD_HOSTがなければ真
+if [ -z "${MPD_HOST}" ] ; then
+
+	# 偽の場合はホスト名を代入
+	export MPD_HOST="${host}"
+
+fi
 # ====== 変数の設定ここまで ======
 
-mpc playlist | grep -n . | fzf --reverse | cut -d":" -f1 | xargs mpc play
+
+mpc playlist | grep -n -F "" | 
+
+# fzfの出力順を設定,プロンプトをMPD_HOSTに設定
+fzf --reverse --prompt="${MPD_HOST} > " |
+
+awk -F":" '
+
+$1 ~ /[0-9]/{
+
+	print "play", $1
+
+}
+' | xargs mpc
  
