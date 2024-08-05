@@ -8,29 +8,25 @@ export LANG=C
 
 export POSIXLY_CORRECT=1
 
-host="$(hostname)"
-
 # MPD_HOSTがなければ真
 if [ -z "${MPD_HOST}" ] ; then
 
-	# 偽の場合はホスト名を代入
+	# ホスト名を取得
+	host="$(uname -n)"
+
 	export MPD_HOST="${host}"
 
 fi
 # ====== 変数の設定ここまで ======
 
 
-mpc playlist | grep -n -F "" | 
+set -u
+
+# キュー内の曲一覧に行番号を付与して出力
+mpc playlist | nl | 
 
 # fzfの出力順を設定,プロンプトをMPD_HOSTに設定
 fzf --reverse --prompt="${MPD_HOST} > " |
 
-awk -F":" '
-
-$1 ~ /[0-9]/{
-
-	print "play", $1
-
-}
-' | xargs mpc
+awk '{print "play", $1}' | xargs mpc
  
