@@ -1,0 +1,33 @@
+#!/bin/sh 
+
+set -e
+
+# ====== 変数の設定 ======
+
+export LC_ALL=C
+export LANG=C
+
+export POSIXLY_CORRECT=1
+
+# MPD_HOSTがなければ真
+if [ -z "${MPD_HOST}" ] ; then
+
+	# ホスト名を取得
+	host="$(uname -n)"
+
+	export MPD_HOST="${host}"
+
+fi
+# ====== 変数の設定ここまで ======
+
+
+set -u
+
+# プレイリスト一覧を出力
+mpc lsplaylist |
+
+# fzfの出力順を設定,プロンプトをMPD_HOSTに設定
+fzf --reverse --prompt="${MPD_HOST} > " |
+
+xargs mpc load
+
