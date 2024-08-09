@@ -36,21 +36,35 @@ mpdをdmenuから操作するシェルスクリプト
 ```sh
 # mpcのインストール
 # debian系
-$ sudo apt install mpc
+$ sudo apt install mpc fzf -y
 
 # githubよりclone
 $ git clone https://github.com/tekkamelon/interactive-mpc
 
 # スクリプトのあるディレクトリへ移動
-$ cd interactive-mpc/
+$ cd interactive-mpc/bin
 
 # 実行権限を付与
-$ chmod 755 install-mpc.sh
+$ chmod 755 *
 ```
 
-## hot to use
+## interactive_mpc
 
-```sh
-# スクリプトを起動
-$ ./dmenu_mpc.sh
-```
+- mpcコマンドをcli上で対話的に使用
+
+## dmenu_mpc
+
+- mpcコマンドをdmenuで対話的に使用
+
+## mf
+
+- fzfとmpcを用いてキュー内の楽曲を再生
+
+## mpf
+
+- fzfとmpcを用いてプレイリストをキューに追加
+
+## mvf
+
+- fzfとmpcを用いて音量を調整
+
