@@ -34,7 +34,7 @@ mpdをdmenuから操作するシェルスクリプト
 ## install
 
 ```sh
-# mpcのインストール
+# mpc,fzfのインストール
 # debian系
 $ sudo apt install mpc fzf -y
 
@@ -67,4 +67,8 @@ $ chmod 755 *
 ## mvf
 
 - fzfとmpcを用いて音量を調整
+
+## mdf
+
+- fzfとmpcを用いて楽曲一覧をキューに追加
 
