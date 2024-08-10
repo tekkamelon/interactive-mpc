@@ -1,0 +1,29 @@
+#!/bin/sh 
+
+set -e
+
+# ====== 変数の設定 ======
+export LC_ALL=C
+export LANG=C
+
+export POSIXLY_CORRECT=1
+
+# MPD_HOSTがなければ真
+if [ -z "${MPD_HOST}" ] ; then
+
+	# ホスト名を取得
+	host="$(uname -n)"
+
+	export MPD_HOST="${host}"
+
+fi
+# ====== 変数の設定ここまで ======
+
+
+set -u
+
+# 曲一覧を出力,選択された行を変数に代入
+listall=$(mpc listall | fzf --reverse --prompt="${MPD_HOST} > ")
+
+mpc add "${listall}"
+
